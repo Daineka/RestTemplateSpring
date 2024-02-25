@@ -9,10 +9,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import java.io.IOException;
+import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -25,11 +29,13 @@ class AppConfigTest {
     private AppConfig appConfig;
 
     @Test
-    void testDataSourceBeanCreation() {
-        Mockito.when(mockEnv.getRequiredProperty("db.url")).thenReturn("jdbc:postgresql://localhost:5432/LibraryDB");
-        Mockito.when(mockEnv.getRequiredProperty("db.username")).thenReturn("postgres");
-        Mockito.when(mockEnv.getRequiredProperty("db.password")).thenReturn("admin");
-        Mockito.when(mockEnv.getRequiredProperty("db.driver")).thenReturn("org.postgresql.Driver");
+    void testDataSourceBeanCreation() throws IOException {
+        Properties properties = PropertiesLoaderUtils.loadProperties(new ClassPathResource("app.properties"));
+
+        Mockito.when(mockEnv.getRequiredProperty("db.url")).thenReturn(properties.getProperty("db.url"));
+        Mockito.when(mockEnv.getRequiredProperty("db.username")).thenReturn(properties.getProperty("db.username"));
+        Mockito.when(mockEnv.getRequiredProperty("db.password")).thenReturn(properties.getProperty("db.password"));
+        Mockito.when(mockEnv.getRequiredProperty("db.driver")).thenReturn(properties.getProperty("db.driver"));
 
         DataSource dataSource = appConfig.dataSource();
         assertNotNull(dataSource);
